@@ -1,4 +1,4 @@
-use crate::account_types::NftAccount;
+use crate::account_types::{NftAccount, NFT_BASE_ACCOUNT_SIZE};
 use crate::errors::NftokenError;
 use anchor_lang::prelude::*;
 
@@ -22,11 +22,12 @@ pub fn nft_update_inner(ctx: Context<NftUpdate>, args: NftUpdateArgs) -> Result<
 #[derive(Accounts)]
 #[instruction(args: NftUpdateArgs)]
 pub struct NftUpdate<'info> {
-    #[account(mut, has_one = authority)]
+    #[account(mut, has_one = authority, realloc = NFT_BASE_ACCOUNT_SIZE + args.metadata_url.len(), realloc::payer = authority, realloc::zero = false)]
     pub nft: Account<'info, NftAccount>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]

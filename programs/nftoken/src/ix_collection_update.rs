@@ -1,4 +1,4 @@
-use crate::account_types::CollectionAccount;
+use crate::account_types::{CollectionAccount, COLLECTION_BASE_ACCOUNT_SIZE};
 use crate::errors::NftokenError;
 use anchor_lang::prelude::*;
 
@@ -24,11 +24,12 @@ pub fn collection_update_inner(
 #[derive(Accounts)]
 #[instruction(args: CollectionUpdateArgs)]
 pub struct CollectionUpdate<'info> {
-    #[account(mut, has_one = authority)]
+    #[account(mut, has_one = authority, realloc = COLLECTION_BASE_ACCOUNT_SIZE + args.metadata_url.len(), realloc::payer = authority, realloc::zero = false)]
     pub collection: Account<'info, CollectionAccount>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
